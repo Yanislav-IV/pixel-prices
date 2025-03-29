@@ -1,42 +1,45 @@
 // script.js
 
-// Helper: Generate a random color
+// Helper: Generate a random bright color
 function randomColor() {
-  const r = Math.floor(Math.random() * 156) + 100; // 100-255 for brighter colors
+  const r = Math.floor(Math.random() * 156) + 100; // 100-255 for brightness
   const g = Math.floor(Math.random() * 156) + 100;
   const b = Math.floor(Math.random() * 156) + 100;
   return `rgb(${r},${g},${b})`;
 }
 
-// Parse CSV data and group by phone name
+console.log("Starting Papa.parse for CSV...");
+
 Papa.parse("phone_prices.csv", {
   download: true,
   header: true,
   complete: function(results) {
-    // Group data: key is phone name, value is array of { date, price }
+    console.log("CSV Parsing complete. Data received:", results.data);
+    
+    // Group data by phone name
     const groups = {};
     results.data.forEach(row => {
-      // Skip rows with missing values
-      if (!row.date || !row.name || !row.price) return;
+      if (!row.date || !row.name || !row.price) {
+        console.log("Skipping row due to missing data:", row);
+        return;
+      }
       if (!groups[row.name]) groups[row.name] = [];
       groups[row.name].push({ date: row.date, price: parseFloat(row.price) });
     });
-
-    // Create a sorted list of dates (x-axis) for each phone
-    // We'll assume dates are in YYYY-MM-DD format
-    // For each phone, sort its data points
+    console.log("Grouped data by phone:", groups);
+    
+    // Sort each phone's data points by date
     for (let phone in groups) {
       groups[phone].sort((a, b) => new Date(a.date) - new Date(b.date));
     }
-
-    // Prepare datasets for Chart.js
+    
+    // Prepare Chart.js datasets
     const datasets = [];
-    const phoneColors = {}; // to store base colors for each phone
-
-    Object.keys(groups).forEach((phone, index) => {
-      // Use the dates from the phone's own data as labels later. For the chart we need a common x-axis.
-      // Here we'll assume that each phone might have data for different dates,
-      // so we'll combine all dates from all phones.
+    const phoneColors = {};
+    const phoneNames = Object.keys(groups);
+    console.log("Phone names to be plotted:", phoneNames);
+    
+    phoneNames.forEach((phone, index) => {
       phoneColors[phone] = randomColor();
       const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
       datasets.push({
@@ -48,13 +51,14 @@ Papa.parse("phone_prices.csv", {
         tension: 0.1,
       });
     });
-
+    
+    console.log("Prepared datasets for Chart.js:", datasets);
+    
     // Create the Chart.js chart
     const ctx = document.getElementById('priceChart').getContext('2d');
     const priceChart = new Chart(ctx, {
       type: 'line',
       data: {
-        // x-values come from each dataset's data objects
         datasets: datasets
       },
       options: {
@@ -63,7 +67,7 @@ Papa.parse("phone_prices.csv", {
           x: {
             type: 'time',
             time: {
-              parser: 'yyyy-MM-dd', // Use Luxon formatting
+              parser: 'yyyy-MM-dd',
               unit: 'day',
               displayFormats: { day: 'yyyy-MM-dd' }
             },
@@ -80,38 +84,43 @@ Papa.parse("phone_prices.csv", {
           }
         },
         plugins: {
-          legend: {
-            display: false // We are making our own list
-          },
-          tooltip: {
-            mode: 'nearest',
-            intersect: false
-          }
+          legend: { display: false },
+          tooltip: { mode: 'nearest', intersect: false }
         }
       }
     });
-
-    // Build the phone list on the right side
+    
+    console.log("Chart created successfully.");
+    
+    // Build the phone list on the right side for interactivity
     const listEl = document.getElementById("list");
-    Object.keys(groups).forEach((phone, i) => {
+    phoneNames.forEach((phone, i) => {
       const li = document.createElement("li");
       li.textContent = phone;
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
-      li.dataset.datasetIndex = i; // store index to match with chart dataset
-
-      // Event listeners to highlight the phone line
+      li.dataset.datasetIndex = i;
+      
       li.addEventListener("mouseover", () => {
-        // Set all datasets to default
+        console.log(`Mouseover on: ${phone}`);
+        // Reset all lines to default
         priceChart.data.datasets.forEach(ds => ds.borderWidth = 2);
-        // Highlight the hovered one by increasing border width and brightening color
+        // Highlight this phone's line
         priceChart.data.datasets[i].borderWidth = 5;
         priceChart.update();
       });
+      
       li.addEventListener("mouseout", () => {
+        console.log(`Mouseout from: ${phone}`);
         priceChart.data.datasets[i].borderWidth = 2;
         priceChart.update();
       });
+      
       listEl.appendChild(li);
     });
+    
+    console.log("Phone list created for interactivity.");
+  },
+  error: function(err) {
+    console.error("Error during CSV parsing:", err);
   }
 });
