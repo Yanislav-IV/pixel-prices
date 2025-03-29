@@ -1,6 +1,7 @@
 import sys, time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 print("Hello World")
 sys.stdout.flush()
@@ -11,10 +12,11 @@ options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
-driver = webdriver.Chrome(options=options, executable_path="/usr/bin/chromedriver")
+service = Service("/usr/bin/chromedriver")
+driver = webdriver.Chrome(service=service, options=options)
 url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
 driver.get(url)
-time.sleep(10)  # wait 10 seconds for the challenge to be solved
+time.sleep(10)
 html = driver.page_source
 print(html)
 sys.stdout.flush()
