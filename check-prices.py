@@ -23,7 +23,7 @@ driver.get(url)
 print("Page requested, waiting for challenge resolution...")
 sys.stdout.flush()
 
-time.sleep(30)  # Increased wait time
+time.sleep(60)  # Increased wait time
 
 html = driver.page_source
 print("HTML length:", len(html))
