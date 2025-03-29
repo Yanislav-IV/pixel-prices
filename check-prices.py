@@ -1,34 +1,25 @@
-import sys, time
-import undetected_chromedriver as uc
-from selenium.webdriver.chrome.options import Options
+import requests
 from bs4 import BeautifulSoup
 
-print("Hello World")
-sys.stdout.flush()
+def extract_price(c):
+    ip = c.find('strong').get_text(strip=True)
+    dp = c.find('sup').get_text(strip=True)
+    return float(ip + "." + dp)
 
-options = uc.ChromeOptions()
-options.add_argument("--headless=new")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
-options.add_argument("--disable-blink-features=AutomationControlled")
-options.add_argument("--disable-infobars")
-options.binary_location = "/usr/bin/google-chrome-stable"
+def parse_phone(c):
+    name = c.find('p', class_='item-brand').get_text(strip=True)
+    link = c.find('a', href=True)['href']
+    price = extract_price(c.find('span', class_='total-price new-price'))
+    return {"name": name, "link": link, "price": price}
 
-driver = uc.Chrome(options=options)
-print("Driver started")
-sys.stdout.flush()
+def get_all_phones(url):
+    soup = BeautifulSoup(requests.get(url).content, 'html.parser')
+    return [parse_phone(c) for c in soup.find_all('div', class_='mobile-width')]
 
 url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
-driver.get(url)
-print("Page requested, waiting for challenge resolution...")
-sys.stdout.flush()
-
-time.sleep(60)  # Increased wait time
-
-html = driver.page_source
-print("HTML length:", len(html))
-soup = BeautifulSoup(html, 'html.parser')
-print("Page title:", soup.title.string if soup.title else "No title")
-sys.stdout.flush()
-
-driver.quit()
+phones = get_all_phones(url)
+for phone in phones:
+    print("Name:", phone["name"])
+    print("Link:", phone["link"])
+    print("Price:", phone["price"])
+    print("-" * 40)
