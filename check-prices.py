@@ -1,15 +1,21 @@
-import sys, requests
+import sys, time
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 print("Hello World")
 sys.stdout.flush()
 
-headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0"}
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--disable-gpu")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+driver = webdriver.Chrome(options=options, executable_path="/usr/bin/chromedriver")
 url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
-
-response = requests.get(url, headers=headers)
-print("Status Code:", response.status_code)
-sys.stdout.flush()
-
-html = response.text
+driver.get(url)
+time.sleep(10)  # wait 10 seconds for the challenge to be solved
+html = driver.page_source
 print(html)
 sys.stdout.flush()
+driver.quit()
