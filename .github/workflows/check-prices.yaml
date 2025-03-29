@@ -18,7 +18,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4 cloudscraper
+        run: pip install requests beautifulsoup4
 
       - name: Run phone price script
-        run: python check-prices.py
+        run: python3 check-prices.py
