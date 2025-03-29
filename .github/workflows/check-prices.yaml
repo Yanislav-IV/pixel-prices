@@ -1,7 +1,9 @@
 name: Run Phone Price Script
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - dev
 
 jobs:
   run-script:
