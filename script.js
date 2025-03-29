@@ -63,11 +63,9 @@ Papa.parse("phone_prices.csv", {
           x: {
             type: 'time',
             time: {
-              parser: 'YYYY-MM-DD',
+              parser: 'yyyy-MM-dd', // Use Luxon formatting
               unit: 'day',
-              displayFormats: {
-                day: 'YYYY-MM-DD'
-              }
+              displayFormats: { day: 'yyyy-MM-dd' }
             },
             title: {
               display: true,
