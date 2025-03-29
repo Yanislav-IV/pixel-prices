@@ -20,5 +20,10 @@ jobs:
       - name: Install dependencies
         run: pip install requests beautifulsoup4 undetected-chromedriver
 
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
       - name: Run phone price script
         run: python3 check-prices.py
