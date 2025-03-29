@@ -102,16 +102,24 @@ Papa.parse("phone_prices.csv", {
       
       li.addEventListener("mouseover", () => {
         console.log(`Mouseover on: ${phone}`);
-        // Reset all lines to default
-        priceChart.data.datasets.forEach(ds => ds.borderWidth = 2);
-        // Highlight this phone's line
+        // When hovering, dim all lines to a gray color and set border width to 2
+        priceChart.data.datasets.forEach((ds, idx) => {
+          ds.borderWidth = 2;
+          ds.borderColor = "rgba(200, 200, 200, 0.3)"; // light gray for dimming
+        });
+        // Highlight the hovered dataset with its original color and thicker border
         priceChart.data.datasets[i].borderWidth = 5;
+        priceChart.data.datasets[i].borderColor = phoneColors[phone];
         priceChart.update();
       });
       
       li.addEventListener("mouseout", () => {
         console.log(`Mouseout from: ${phone}`);
-        priceChart.data.datasets[i].borderWidth = 2;
+        // On mouse out, restore original colors and border widths for all datasets
+        priceChart.data.datasets.forEach((ds, idx) => {
+          ds.borderWidth = 2;
+          ds.borderColor = phoneColors[ds.label];
+        });
         priceChart.update();
       });
       
