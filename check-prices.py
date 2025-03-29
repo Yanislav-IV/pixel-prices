@@ -9,7 +9,7 @@ def extract_price(c):
 def parse_phone(c):
     name = c.find('p', class_='item-brand').get_text(strip=True)
     price = extract_price(c.find('span', class_='total-price new-price'))
-    return {"name": name, "link": link, "price": price}
+    return {"name": name, "price": price}
 
 def get_all_phones(url):
     soup = BeautifulSoup(requests.get(url).content, 'html.parser')
