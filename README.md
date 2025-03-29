@@ -1,1 +1,1 @@
-[# pixe](https://yanislav-iv.github.io/pixel-prices/)
+https://yanislav-iv.github.io/pixel-prices/
