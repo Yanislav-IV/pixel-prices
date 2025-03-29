@@ -18,4 +18,4 @@ jobs:
           
       - name: Run Python parsing script
         run: |
-          python fetch_prices.py
+          cat phone_page.html
