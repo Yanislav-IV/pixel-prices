@@ -3,16 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <title>Phone Price Trends</title>
-  <!-- Chart.js for graphs -->
+  <style>
+    /* Basic styling for layout */
+    #container {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    #chart-container {
+      flex: 2;
+    }
+    #phone-list {
+      flex: 1;
+      margin-left: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    #phone-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    #phone-list li {
+      padding: 5px 10px;
+      margin: 2px 0;
+      cursor: pointer;
+    }
+    #phone-list li:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- PapaParse for CSV parsing -->
+  <!-- PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
 <body>
   <h2>Phone Price Trends</h2>
-  <canvas id="priceChart" width="600" height="400"></canvas>
-  
-  <!-- Load custom JavaScript -->
+  <div id="container">
+    <div id="chart-container">
+      <canvas id="priceChart" width="800" height="400"></canvas>
+    </div>
+    <div id="phone-list">
+      <h3>Phones</h3>
+      <ul id="list"></ul>
+    </div>
+  </div>
+
+  <!-- Custom JavaScript -->
   <script src="script.js"></script>
 </body>
 </html>
