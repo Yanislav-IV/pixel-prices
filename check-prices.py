@@ -1,5 +1,4 @@
-import sys
-import requests
+import sys, requests
 from bs4 import BeautifulSoup
 
 print("Hello World")
@@ -17,13 +16,11 @@ def parse_phone(c):
     return {"name": name, "link": link, "price": price}
 
 def get_all_phones(url):
-    print("Fetching URL:", url)
-    sys.stdout.flush()
     soup = BeautifulSoup(requests.get(url, headers=headers).content, 'html.parser')
-    phones = soup.find_all('div', class_='mobile-width')
-    print("Found", len(phones), "phones")
+    containers = soup.find_all('div', class_='item-container')
+    print("Found", len(containers), "item-containers")
     sys.stdout.flush()
-    return [parse_phone(c) for c in phones]
+    return [parse_phone(c) for c in containers]
 
 url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
 phones = get_all_phones(url)
