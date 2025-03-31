@@ -56,7 +56,7 @@ Papa.parse("phone_prices.csv", {
       phoneColors[phone] = randomColor();
       const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
       datasets.push({
-	label: formatPhoneName( phone,
+	label: phone,
         data: dataPoints,
         borderColor: phoneColors[phone],
         backgroundColor: phoneColors[phone],
