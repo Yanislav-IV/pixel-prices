@@ -10,6 +10,19 @@ function randomColor() {
 
 console.log("Starting Papa.parse for CSV...");
 
+function formatPhoneName(fullName) {
+  // Remove all occurrences of "5G"
+  let name = fullName.replace(/5G/gi, "");
+  // Find the start position of "Pixel"
+  let start = name.indexOf("Pixel");
+  if (start === -1) start = 0; // fallback if not found
+  // Find the first occurrence of "GB" after "Pixel"
+  let gbIndex = name.indexOf("GB", start);
+  if (gbIndex === -1) return name.trim();
+  // Return substring from "Pixel" to "GB" (inclusive)
+  return name.substring(start, gbIndex + 2).trim();
+}
+
 Papa.parse("phone_prices.csv", {
   download: true,
   header: true,
@@ -43,7 +56,7 @@ Papa.parse("phone_prices.csv", {
       phoneColors[phone] = randomColor();
       const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
       datasets.push({
-        label: phone,
+	label: formatPhoneName( phone,
         data: dataPoints,
         borderColor: phoneColors[phone],
         backgroundColor: phoneColors[phone],
@@ -96,7 +109,7 @@ Papa.parse("phone_prices.csv", {
     const listEl = document.getElementById("list");
     phoneNames.forEach((phone, i) => {
       const li = document.createElement("li");
-      li.textContent = phone;
+      li.textContent = formatPhoneName(phone);
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
       
