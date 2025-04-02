@@ -112,7 +112,7 @@ Papa.parse("phone_prices.csv", {
       li.textContent = formatPhoneName(phone);
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
-      li.style.fontSize = "0.8em";    
+      li.style.fontSize = "0.7em";    
 
       li.addEventListener("mouseover", () => {
         console.log(`Mouseover on: ${phone}`);
