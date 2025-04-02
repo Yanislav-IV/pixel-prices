@@ -112,7 +112,8 @@ Papa.parse("phone_prices.csv", {
       li.textContent = formatPhoneName(phone);
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
-      
+      li.style.fontSize = "0.8em";    
+
       li.addEventListener("mouseover", () => {
         console.log(`Mouseover on: ${phone}`);
         // When hovering, dim all lines to a gray color and set border width to 2
