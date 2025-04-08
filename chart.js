@@ -77,6 +77,9 @@ Papa.parse("phone_prices.csv", {
 	    }
           },
           y: {
+	    ticks: {
+	      stepSize: 100
+            }
           }
         },
         plugins: {
