@@ -6,9 +6,8 @@ import os
 import subprocess
 
 def extract_price(c):
-    ip = c.find('strong').get_text(strip=True)
-    dp = c.find('sup').get_text(strip=True)
-    return float(ip + "." + dp)
+    price = c.find('strong').get_text(strip=True)
+    return int(price)
 
 def parse_phone(c):
     name = c.find('p', class_='item-brand').get_text(strip=True)
