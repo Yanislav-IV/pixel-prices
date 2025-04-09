@@ -54,7 +54,16 @@ Papa.parse("phone_prices.csv", {
         },
         plugins: {
           legend: { display: false },
-          tooltip: { mode: 'nearest', intersect: false }
+          tooltip: { 
+            mode: 'nearest',
+            intersect: false,
+            callbacks: {
+              title(tooltipItems) {
+                const d = new Date(tooltipItems[0].parsed.x);
+                return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+              }
+            }
+          }
         }
       }
     });
