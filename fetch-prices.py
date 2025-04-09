@@ -12,9 +12,8 @@ def extract_price(c):
 
 def parse_phone(c):
     name = c.find('p', class_='item-brand').get_text(strip=True)
-    link = c.find('a', href=True)['href']
     price = extract_price(c.find('span', class_='total-price new-price'))
-    return {"name": name, "link": link, "price": price}
+    return {"name": name, "price": price}
 
 def get_all_phones(url):
     soup = BeautifulSoup(requests.get(url).content, 'html.parser')
@@ -25,18 +24,13 @@ def update_csv(phones, filename="phone_prices.csv"):
     today = datetime.now().strftime("%Y-%m-%d")
     with open(filename, 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(["date", "name", "link", "price"])  # Write header if file is new
         for phone in phones:
-            writer.writerow([today, phone["name"], phone["link"], phone["price"]])
+            writer.writerow([today, phone["name"], phone["price"]])
 
 def commit_and_push_changes():
-    # Stage the updated CSV file
     subprocess.run(["git", "add", "phone_prices.csv"])
-    # Commit the changes with a message that includes the date
     commit_message = "Update phone prices for " + datetime.now().strftime("%Y-%m-%d")
     subprocess.run(["git", "commit", "-m", commit_message])
-    # Push the changes using HTTPS (ensure your credentials or PAT are configured)
     subprocess.run(["git", "push", "origin", "main"])
 
 def main():
