@@ -47,6 +47,7 @@ Papa.parse("phone_prices.csv", {
       data: { datasets },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
           x: {
             type: 'time',
