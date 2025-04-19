@@ -4,40 +4,48 @@
   <meta charset="UTF-8">
   <title>Phone Price Trends</title>
   <style>
-    #priceChart {
-      display: block;
-      width: 100% !important;
-      height: 100% !important;
-    }
-    #container {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-    }
-    #chart-container {
-      width: 100%;
-      height: 60vh;
-      max-height: 600px;
-    }
-    #phone-list {
-      flex: 1;
-      margin-left: 20px;
-      max-height: 500px;
-      overflow-y: auto;
-    }
-    #phone-list ul {
-      list-style: none;
-      padding: 0;
-    }
-    #phone-list li {
-      padding: 5px 10px;
-      margin: 2px 0;
-      cursor: pointer;
-    }
-    #phone-list li:hover {
-      background-color: #f0f0f0;
-    }
-  </style>
+  #container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  #chart-container {
+    flex: 2;
+    height: 70vh;
+    min-height: 400px;
+  }
+
+  #priceChart {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #phone-list {
+    flex: 1;
+    margin-left: 20px;
+    height: 70vh;
+    overflow-y: auto;
+  }
+
+  #phone-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  #phone-list li {
+    padding: 5px 10px;
+    margin: 2px 0;
+    cursor: pointer;
+    font-size: 0.7em;
+  }
+
+  #phone-list li:hover {
+    background-color: #f0f0f0;
+  }
+</style>
   <!-- Luxon for date handling -->
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.2.1/build/global/luxon.min.js"></script>
   <!-- Chart.js -->
