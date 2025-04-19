@@ -61,14 +61,14 @@ Papa.parse("phone_prices.csv", {
                 : "rgba(200,200,200,0.3)";
             });
             listItems.forEach((li, j) => {
-              li.style.fontWeight = j === idx ? "bold" : "normal";
+              li.style.backgroundColor = j === idx ? "#f0f0f0" : "";
             });
           } else {
             datasets.forEach((ds, j) => {
               ds.borderWidth = 2;
               ds.borderColor = phoneColors[phoneNames[j]];
             });
-            listItems.forEach(li => (li.style.fontWeight = "normal"));
+            listItems.forEach(li => (li.style.backgroundColor = ""));
           }
           priceChart.update("none");
         },
