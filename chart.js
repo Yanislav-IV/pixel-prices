@@ -70,10 +70,14 @@ Papa.parse("phone_prices.csv", {
         }
       }
     });
+    
+    const allDates = results.data.map(r => r.date);
+    const lastDate = allDates.sort()[allDates.length - 1];
     const listEl = document.getElementById("list");
     phoneNames.forEach((phone, i) => {
       const li = document.createElement("li");
-      li.textContent = formatPhoneName(phone);
+      const isAvailable = groups[phone].some(pt => pt.date === lastDate);
+      li.textContent = `${isAvailable ? "✔️" : "🚫"} ${formatPhoneName(phone)}`;
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
       li.style.fontSize = "0.7em";
