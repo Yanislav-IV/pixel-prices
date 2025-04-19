@@ -26,6 +26,9 @@ Papa.parse("phone_prices.csv", {
       groups[phone].sort((a, b) => new Date(a.date) - new Date(b.date));
     }
     const datasets = [], phoneColors = {}, phoneNames = Object.keys(groups);
+    phoneNames.sort((a, b) =>
+      formatPhoneName(b).localeCompare(formatPhoneName(a))
+    );
     phoneNames.forEach((phone, i) => {
       phoneColors[phone] = randomColor();
       const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
@@ -89,6 +92,5 @@ Papa.parse("phone_prices.csv", {
       });
       listEl.appendChild(li);
     });
-  },
-  error: err => console.error("Error during CSV parsing:", err)
+  }
 });
