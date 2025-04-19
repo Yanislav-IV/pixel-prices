@@ -52,9 +52,18 @@ Papa.parse("phone_prices.csv", {
           x: {
             type: 'time',
             time: { parser: 'yyyy-MM-dd', unit: 'day', displayFormats: { day: 'MMM dd' } },
-            ticks: { maxRotation: 90, minRotation: 90 }
+            ticks: { 
+              maxRotation: 90, 
+              minRotation: 90,
+              font: { size: 14 }
+            }
           },
-          y: { ticks: { stepSize: 100 } }
+          y: { 
+            ticks: { 
+              stepSize: 100,
+              font: { size: 14 }
+            } 
+          }
         },
         plugins: {
           legend: { display: false },
