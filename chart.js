@@ -55,13 +55,13 @@ Papa.parse("phone_prices.csv", {
             ticks: { 
               maxRotation: 90, 
               minRotation: 90,
-              font: { size: 14 }
+              font: { size: 16 }
             }
           },
           y: { 
             ticks: { 
               stepSize: 100,
-              font: { size: 14 }
+              font: { size: 16 }
             } 
           }
         },
