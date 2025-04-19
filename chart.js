@@ -38,7 +38,9 @@ Papa.parse("phone_prices.csv", {
         borderColor: phoneColors[phone],
         backgroundColor: phoneColors[phone],
         borderWidth: 2,
-        tension: 0.1
+        tension: 0.1,
+        pointRadius: 0,
+        pointHitRadius: 12
       });
     });
     const ctx = document.getElementById('priceChart').getContext('2d');
