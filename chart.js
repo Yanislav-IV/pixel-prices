@@ -81,7 +81,6 @@ Papa.parse("phone_prices.csv", {
       li.textContent = `${isAvailable ? "✔️" : "🚫"} ${formatPhoneName(phone)}`;
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
-      li.style.fontSize = "0.7em";
       li.addEventListener("mouseover", () => {
         priceChart.data.datasets.forEach(ds => { ds.borderWidth = 2; ds.borderColor = "rgba(200, 200, 200, 0.3)"; });
         priceChart.data.datasets[i].borderWidth = 5;
