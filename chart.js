@@ -48,32 +48,50 @@ Papa.parse("phone_prices.csv", {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        onHover(evt, elements) {
+          if (elements.length) {
+            const idx = elements[0].datasetIndex;
+            datasets.forEach((ds, j) => {
+              ds.borderWidth = j === idx ? 5 : 2;
+              ds.borderColor = j === idx
+                ? phoneColors[phoneNames[j]]
+                : "rgba(200,200,200,0.3)";
+            });
+            listItems.forEach((li, j) => {
+              li.style.fontWeight = j === idx ? "bold" : "normal";
+            });
+          } else {
+            datasets.forEach((ds, j) => {
+              ds.borderWidth = 2;
+              ds.borderColor = phoneColors[phoneNames[j]];
+            });
+            listItems.forEach(li => (li.style.fontWeight = "normal"));
+          }
+          priceChart.update("none");
+        },
         scales: {
           x: {
             type: 'time',
             time: { parser: 'yyyy-MM-dd', unit: 'day', displayFormats: { day: 'MMM dd' } },
-            ticks: { 
-              maxRotation: 90, 
-              minRotation: 90,
-              font: { size: 16 }
-            }
+            ticks: { maxRotation: 90, minRotation: 90, font: { size: 16 } }
           },
-          y: { 
-            ticks: { 
-              stepSize: 100,
-              font: { size: 16 }
-            } 
+          y: {
+            ticks: { stepSize: 100, font: { size: 16 } }
           }
         },
         plugins: {
           legend: { display: false },
-          tooltip: { 
+          tooltip: {
             mode: 'nearest',
             intersect: false,
             callbacks: {
               title(tooltipItems) {
                 const d = new Date(tooltipItems[0].parsed.x);
-                return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+                return d.toLocaleDateString(undefined, {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                });
               }
             }
           }
@@ -84,6 +102,7 @@ Papa.parse("phone_prices.csv", {
     const allDates = results.data.map(r => r.date);
     const lastDate = allDates.sort()[allDates.length - 1];
     const listEl = document.getElementById("list");
+    const listItems = [];
     phoneNames.forEach((phone, i) => {
       const li = document.createElement("li");
       const isAvailable = groups[phone].some(pt => pt.date === lastDate);
@@ -104,6 +123,7 @@ Papa.parse("phone_prices.csv", {
         priceChart.update();
       });
       listEl.appendChild(li);
+      listItems.push(li);
     });
   }
 });
