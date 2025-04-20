@@ -116,13 +116,14 @@ Papa.parse("phone_prices.csv", {
     phoneNames.forEach((phone, i) => {
       const li = document.createElement("li");
       const isAvailable = groups[phone].some(pt => pt.date === lastDate);
-      const productUrl = "https://www.buybest.bg/" + toSlug(phone);
-      
+      const icon  = isAvailable ? "✔️" : "🚫";
+      const label = formatPhoneName(phone);
+      const url = "https://www.buybest.bg/" + toSlug(phone);
+      const linkOrLabel = isAvailable ? `<a href="${url}" target="_blank">${label}</a>` : label;
+
+      li.innerHTML = `${icon} ${linkOrLabel}`;
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
-      li.innerHTML = `${isAvailable ? "✔️" : "🚫"} `
-                   + `<a href="${productUrl}" target="_blank">`
-                   + `${formatPhoneName(phone)}</a>`;
       
       li.addEventListener("mouseover", () => {
         priceChart.data.datasets.forEach(ds => { ds.borderWidth = 2; ds.borderColor = "rgba(200, 200, 200, 0.3)"; });
