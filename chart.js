@@ -109,6 +109,12 @@ Papa.parse("phone_prices.csv", {
     phoneNames.forEach((phone, i) => {
       const li = document.createElement("li");
       const isAvailable = groups[phone].some(pt => pt.date === lastDate);
+
+      const searchUrl = "https://www.buybest.bg/search-page/" + encodeURIComponent(phone) 
+      li.innerHTML = `${isAvailable ? "✔️" : "🚫"} `
+                   + `<a href="${searchUrl}" target="_blank" style="text-decoration:none;color:inherit;">`
+                   + `${formatPhoneName(phone)}</a>`;
+      
       li.textContent = `${isAvailable ? "✔️" : "🚫"} ${formatPhoneName(phone)}`;
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
