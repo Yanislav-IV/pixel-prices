@@ -106,24 +106,25 @@ Papa.parse("phone_prices.csv", {
     const lastDate = allDates.sort()[allDates.length - 1];
     const listEl = document.getElementById("list");
     const listItems = [];
+    
     phoneNames.forEach((phone, i) => {
       const li = document.createElement("li");
       const isAvailable = groups[phone].some(pt => pt.date === lastDate);
-
       const searchUrl = "https://www.buybest.bg/search-page/" + encodeURIComponent(phone) 
+      
+      li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
+      li.dataset.datasetIndex = i;
       li.innerHTML = `${isAvailable ? "✔️" : "🚫"} `
                    + `<a href="${searchUrl}" target="_blank" style="text-decoration:none;color:inherit;">`
                    + `${formatPhoneName(phone)}</a>`;
       
-      li.textContent = `${isAvailable ? "✔️" : "🚫"} ${formatPhoneName(phone)}`;
-      li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
-      li.dataset.datasetIndex = i;
       li.addEventListener("mouseover", () => {
         priceChart.data.datasets.forEach(ds => { ds.borderWidth = 2; ds.borderColor = "rgba(200, 200, 200, 0.3)"; });
         priceChart.data.datasets[i].borderWidth = 5;
         priceChart.data.datasets[i].borderColor = phoneColors[phone];
         priceChart.update();
       });
+      
       li.addEventListener("mouseout", () => {
         priceChart.data.datasets.forEach(ds => {
           ds.borderWidth = 2;
@@ -131,6 +132,7 @@ Papa.parse("phone_prices.csv", {
         });
         priceChart.update();
       });
+      
       listEl.appendChild(li);
       listItems.push(li);
     });
