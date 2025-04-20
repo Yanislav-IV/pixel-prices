@@ -12,6 +12,12 @@ function formatPhoneName(fullName) {
   return gbIndex === -1 ? name.trim() : name.substring(start, gbIndex + 2).trim();
 }
 
+function toSlug(str) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-");
+}
+
 Papa.parse("phone_prices.csv", {
   download: true,
   header: true,
@@ -110,12 +116,12 @@ Papa.parse("phone_prices.csv", {
     phoneNames.forEach((phone, i) => {
       const li = document.createElement("li");
       const isAvailable = groups[phone].some(pt => pt.date === lastDate);
-      const searchUrl = "https://www.buybest.bg/search-page/" + encodeURIComponent(phone) 
+      const productUrl = "https://www.buybest.bg/" + toSlug(phone);
       
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
       li.innerHTML = `${isAvailable ? "✔️" : "🚫"} `
-                   + `<a href="${searchUrl}" target="_blank" style="text-decoration:none;color:inherit;">`
+                   + `<a href="${productUrl}" target="_blank" style="text-decoration:none;color:inherit;">`
                    + `${formatPhoneName(phone)}</a>`;
       
       li.addEventListener("mouseover", () => {
