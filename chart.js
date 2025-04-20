@@ -120,8 +120,9 @@ Papa.parse("phone_prices.csv", {
       const label = formatPhoneName(phone);
       const url = "https://www.buybest.bg/" + toSlug(phone);
       const linkOrLabel = isAvailable ? `<a href="${url}" target="_blank">${label}</a>` : label;
-
+      
       li.innerHTML = `${icon} ${linkOrLabel}`;
+      li.style.cursor = isAvailable ? "pointer" : "default";
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
       
