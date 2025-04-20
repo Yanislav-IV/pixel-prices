@@ -121,7 +121,7 @@ Papa.parse("phone_prices.csv", {
       li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
       li.dataset.datasetIndex = i;
       li.innerHTML = `${isAvailable ? "✔️" : "🚫"} `
-                   + `<a href="${productUrl}" target="_blank" style="text-decoration:none;color:inherit;">`
+                   + `<a href="${productUrl}" target="_blank">`
                    + `${formatPhoneName(phone)}</a>`;
       
       li.addEventListener("mouseover", () => {
