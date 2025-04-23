@@ -60,6 +60,8 @@ Papa.parse("phone_prices.csv", {
     const prices   = results.data.map(r => Number(r.price));
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
+    const minY     = Math.ceil(minPrice / 100) * 100;
+    const maxY     = Math.floor(maxPrice / 100) * 100;
     
     const priceChart = new Chart(ctx, {
       type: 'line',
@@ -95,8 +97,8 @@ Papa.parse("phone_prices.csv", {
             ticks: { maxRotation: 90, minRotation: 90, font: { size: 16 } }
           },
           y: {
-            min: minPrice,
-            max: maxPrice,
+            min: minY,
+            max: maxY,
             ticks: { 
               stepSize: 100,
               font: { size: 16 }
