@@ -23,18 +23,23 @@ Papa.parse("phone_prices.csv", {
   header: true,
   complete: results => {
     const groups = {};
+    
     results.data.forEach(row => {
       if (!row.date || !row.name || !row.price) return;
       groups[row.name] = groups[row.name] || [];
       groups[row.name].push({ date: row.date, price: parseFloat(row.price) });
     });
+    
     for (let phone in groups) {
       groups[phone].sort((a, b) => new Date(a.date) - new Date(b.date));
     }
+    
     const datasets = [], phoneColors = {}, phoneNames = Object.keys(groups);
+    
     phoneNames.sort((a, b) =>
       formatPhoneName(b).localeCompare(formatPhoneName(a))
     );
+    
     phoneNames.forEach((phone, i) => {
       phoneColors[phone] = randomColor();
       const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
@@ -50,7 +55,12 @@ Papa.parse("phone_prices.csv", {
         pointHitRadius: 20
       });
     });
-    const ctx = document.getElementById('priceChart').getContext('2d');
+    
+    const ctx      = document.getElementById('priceChart').getContext('2d');
+    const prices   = results.data.map(r => parseFloat(r.price));
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    
     const priceChart = new Chart(ctx, {
       type: 'line',
       data: { datasets },
@@ -85,6 +95,8 @@ Papa.parse("phone_prices.csv", {
             ticks: { maxRotation: 90, minRotation: 90, font: { size: 16 } }
           },
           y: {
+            min: minPrice,
+            max: maxPrice,
             ticks: { stepSize: 100, font: { size: 16 } }
           }
         },
