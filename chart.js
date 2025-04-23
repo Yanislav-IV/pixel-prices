@@ -97,7 +97,7 @@ Papa.parse("phone_prices.csv", {
           y: {
             min: minPrice,
             max: maxPrice,
-            ticks: { stepSize: 100, font: { size: 16 } }
+            ticks: { font: { size: 16 } }
           }
         },
         plugins: {
