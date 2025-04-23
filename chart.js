@@ -57,9 +57,16 @@ Papa.parse("phone_prices.csv", {
     });
     
     const ctx      = document.getElementById('priceChart').getContext('2d');
-    const prices   = results.data.map(r => parseFloat(r.price));
+    
+    const prices   = results.data.map(r => Number(r.price));
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
+    
+    const tickVals = [minPrice];
+    for (let v = Math.ceil(minPrice / 100) * 100; v < maxPrice; v += 100) {
+      tickVals.push(v);
+    }
+    tickVals.push(maxPrice);
     
     const priceChart = new Chart(ctx, {
       type: 'line',
@@ -95,9 +102,12 @@ Papa.parse("phone_prices.csv", {
             ticks: { maxRotation: 90, minRotation: 90, font: { size: 16 } }
           },
           y: {
-            min: minPrice,
-            max: maxPrice,
-            ticks: { font: { size: 16 } }
+            min: minPrice - 5,
+            max: maxPrice + 5,
+            ticks: { 
+              values: tickVals,
+              font: { size: 16 }
+            }
           }
         },
         plugins: {
