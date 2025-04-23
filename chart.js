@@ -102,8 +102,8 @@ Papa.parse("phone_prices.csv", {
             ticks: { maxRotation: 90, minRotation: 90, font: { size: 16 } }
           },
           y: {
-            min: minPrice - 5,
-            max: maxPrice + 5,
+            min: minPrice,
+            max: maxPrice,
             ticks: { 
               values: tickVals,
               font: { size: 16 }
