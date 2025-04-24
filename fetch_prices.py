@@ -34,6 +34,7 @@ def commit_and_push_changes():
 
 def main():
     url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
+    subprocess.run(["git", "pull"])
     phones = get_all_phones(url)
     update_csv(phones)
     commit_and_push_changes()
