@@ -65,9 +65,21 @@ def diff_states(old_state, new_state, tracked_names):
 def main():
     url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
     subprocess.run(["git", "pull"])
-    phones = get_all_phones(url)
-    update_csv(phones)
-    commit_and_push_changes()
+    old_state = load_state()
+    soup = BeautifulSoup(requests.get(url).content, 'html.parser')
+    new_state = {
+        c.find('p', class_='item-brand').get_text(strip=True):
+        {"price": int(c.find('strong').get_text(strip=True)), "in_stock": True}
+        for c in soup.find_all('div', class_='mobile-width')
+    }
+    changes = diff_states(old_state, new_state)
+    append_history(changes)
+    with open('state.csv', 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        for name, info in new_state.items():
+            writer.writerow([name, info['price']])
+    subprocess.run(["git", "add", "history.csv", "state.csv"])
+    subprocess.run(["git", "commit", "-m", f"Update {datetime.now().strftime('%Y-%m-%d')}" ])
+    subprocess.run(["git", "push", "origin", "main"])
 
-if __name__ == "__main__":
-    main()
+main()
