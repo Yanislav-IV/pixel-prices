@@ -32,6 +32,36 @@ def commit_and_push_changes():
     subprocess.run(["git", "commit", "-m", commit_message])
     subprocess.run(["git", "push", "origin", "main"])
 
+def load_state(state_file="state.csv"):
+    state = {}
+    try:
+        with open(state_file, newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f, fieldnames=["name","price"])
+            for row in reader:
+                if row["name"] == "name":
+                    continue
+                state[row["name"]] = {
+                    "price": int(row["price"]),
+                    "in_stock": True
+                }
+    except FileNotFoundError:
+        pass
+    return state
+
+def diff_states(old_state, new_state, tracked_names):
+    today = datetime.now().strftime("%Y-%m-%d")
+    changes = []
+    for name in tracked_names:
+        old = old_state.get(name, {"price": None, "in_stock": False})
+        new = new_state.get(name, {"price": None, "in_stock": False})
+
+        if old["price"] != new["price"] or old["in_stock"] != new["in_stock"]:
+            price_field   = new["price"] if new["in_stock"] else ""
+            in_stock_flag = int(new["in_stock"])
+            changes.append([today, name, price_field, in_stock_flag])
+
+    return changes
+
 def main():
     url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
     subprocess.run(["git", "pull"])
