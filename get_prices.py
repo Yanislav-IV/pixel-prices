@@ -18,7 +18,7 @@ def get_all_phones(url):
     soup = BeautifulSoup(requests.get(url).content, 'html.parser')
     return [parse_phone(c) for c in soup.find_all('div', class_='mobile-width')]
 
-def update_csv(phones, filename="phone_prices.csv"):
+def update_csv(phones, filename="history.csv"):
     file_exists = os.path.isfile(filename)
     today = datetime.now().strftime("%Y-%m-%d")
     with open(filename, 'a', newline='', encoding='utf-8') as f:
@@ -27,7 +27,7 @@ def update_csv(phones, filename="phone_prices.csv"):
             writer.writerow([today, phone["name"], phone["price"]])
 
 def commit_and_push_changes():
-    subprocess.run(["git", "add", "phone_prices.csv"])
+    subprocess.run(["git", "add", "history.csv"])
     commit_message = "Update phone prices for " + datetime.now().strftime("%Y-%m-%d")
     subprocess.run(["git", "commit", "-m", commit_message])
     subprocess.run(["git", "push", "origin", "main"])
