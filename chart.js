@@ -50,10 +50,16 @@ Papa.parse("history.csv", {
     const tailDate = new Date(lastDate);
     tailDate.setDate(tailDate.getDate() + 1);
     const tailDateStr = tailDate.toISOString().slice(0,10);
+    const firstDateStr = allDates[0];
     
     phoneNames.forEach((phone, i) => {
       phoneColors[phone] = randomColor();
       const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
+
+      if (dataPoints.length) {
+        const firstY = dataPoints[0].y;
+        dataPoints.unshift({ x: firstDateStr, y: firstY });
+      }
       
       if (dataPoints.length) {
         const lastY = dataPoints[dataPoints.length - 1].y;
