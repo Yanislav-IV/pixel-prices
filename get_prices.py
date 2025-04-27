@@ -8,10 +8,7 @@ def load_state(state_file="state.csv"):
     state = {}
     try:
         with open(state_file, newline='', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            next(reader, None)
-            for row in reader:
-                name, price = row
+            for name, price in csv.reader(f):
                 state[name] = {"price": int(price), "in_stock": True}
     except FileNotFoundError:
         pass
