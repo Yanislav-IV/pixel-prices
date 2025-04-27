@@ -44,6 +44,11 @@ Papa.parse("history.csv", {
     phoneNames.forEach((phone, i) => {
       phoneColors[phone] = randomColor();
       const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
+      if (dataPoints.length) {
+        const lastDate = dataPoints[dataPoints.length - 1].x;
+        const lastY    = dataPoints[dataPoints.length - 1].y;
+        dataPoints.push({ x: lastDate, y: lastY });
+      }
       datasets.push({
         label: formatPhoneName(phone),
         data: dataPoints,
