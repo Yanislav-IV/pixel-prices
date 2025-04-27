@@ -40,15 +40,26 @@ Papa.parse("history.csv", {
     phoneNames.sort((a, b) =>
       formatPhoneName(b).localeCompare(formatPhoneName(a))
     );
+
+    const allDates = results.data
+      .map(r => r.date)
+      .filter(Boolean)
+      .sort((a,b) => new Date(a) - new Date(b));
+    
+    const lastDate = allDates[allDates.length - 1];
+    const tailDate = new Date(lastDate);
+    tailDate.setDate(tailDate.getDate() + 1);
+    const tailDateStr = tailDate.toISOString().slice(0,10);
     
     phoneNames.forEach((phone, i) => {
       phoneColors[phone] = randomColor();
       const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
+      
       if (dataPoints.length) {
-        const lastDate = dataPoints[dataPoints.length - 1].x;
-        const lastY    = dataPoints[dataPoints.length - 1].y;
-        dataPoints.push({ x: lastDate, y: lastY });
+        const lastY = dataPoints[dataPoints.length - 1].y;
+        dataPoints.push({ x: tailDateStr, y: lastY });
       }
+      
       datasets.push({
         label: formatPhoneName(phone),
         data: dataPoints,
