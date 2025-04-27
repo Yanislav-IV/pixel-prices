@@ -24,46 +24,52 @@ Papa.parse("history.csv", {
   dynamicTyping: true,
   complete: results => {
     const groups = {};
-    
     results.data.forEach(row => {
       if (!row.date || !row.name) return;
       groups[row.name] = groups[row.name] || [];
       groups[row.name].push({ date: row.date, price: row.price });
     });
     
-    for (let phone in groups) {
-      groups[phone].sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-    
-    const datasets = [], phoneColors = {}, phoneNames = Object.keys(groups);
-    
-    phoneNames.sort((a, b) =>
-      formatPhoneName(b).localeCompare(formatPhoneName(a))
+    Object.values(groups).forEach(arr =>
+      arr.sort((a, b) => new Date(a.date) - new Date(b.date))
     );
 
     const allDates = results.data
       .map(r => r.date)
       .filter(Boolean)
-      .sort((a,b) => new Date(a) - new Date(b));
-    
-    const lastDate = allDates[allDates.length - 1];
-    const tailDate = new Date(lastDate);
+      .sort((a, b) => new Date(a) - new Date(b));
+    const firstDateStr = allDates[0];
+    const lastDate     = allDates[allDates.length - 1];
+    const tailDate     = new Date(lastDate);
     tailDate.setDate(tailDate.getDate() + 1);
     const tailDateStr = tailDate.toISOString().slice(0,10);
-    const firstDateStr = allDates[0];
+    
+    const datasets   = [];
+    const phoneNames = Object.keys(groups).sort((a, b) =>
+      formatPhoneName(b).localeCompare(formatPhoneName(a))
+    );
+    const phoneColors = {};
     
     phoneNames.forEach((phone, i) => {
       phoneColors[phone] = randomColor();
-      const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
+
+      const dataPoints = groups[phone].map(pt => ({
+        x: pt.date,
+        y: pt.price
+      }));
 
       if (dataPoints.length) {
-        const firstY = dataPoints[0].y;
-        dataPoints.unshift({ x: firstDateStr, y: firstY });
+        dataPoints.unshift({
+          x: firstDateStr,
+          y: dataPoints[0].y
+        });
       }
       
       if (dataPoints.length) {
-        const lastY = dataPoints[dataPoints.length - 1].y;
-        dataPoints.push({ x: tailDateStr, y: lastY });
+        dataPoints.push({
+          x: tailDateStr,
+          y: dataPoints[dataPoints.length - 1].y
+        });
       }
       
       datasets.push({
