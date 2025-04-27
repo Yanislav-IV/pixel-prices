@@ -1,157 +1,119 @@
-function randomColor() {
-  const r = Math.floor(Math.random() * 156) + 100,
-        g = Math.floor(Math.random() * 156) + 100,
-        b = Math.floor(Math.random() * 156) + 100;
-  return `rgb(${r},${g},${b})`;
-}
-
-function formatPhoneName(fullName) {
-  let name = fullName.replace(/5G/gi, "");
-  let start = name.indexOf("Pixel") === -1 ? 0 : name.indexOf("Pixel");
-  let gbIndex = name.indexOf("GB", start);
-  return gbIndex === -1 ? name.trim() : name.substring(start, gbIndex + 2).trim();
-}
-
-function toSlug(str) {
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-");
-}
-
-Papa.parse("phone_prices.csv", {
-  download: true,
-  header: true,
-  complete: results => {
-    const groups = {};
-    
-    results.data.forEach(row => {
-      if (!row.date || !row.name || !row.price) return;
-      groups[row.name] = groups[row.name] || [];
-      groups[row.name].push({ date: row.date, price: parseFloat(row.price) });
-    });
-    
-    for (let phone in groups) {
-      groups[phone].sort((a, b) => new Date(a.date) - new Date(b.date));
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pixel Prices</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <canvas id="priceChart" width="800" height="400"></canvas>
+  <script>
+    function randomColor() {
+      const r = Math.floor(Math.random() * 156) + 100,
+            g = Math.floor(Math.random() * 156) + 100,
+            b = Math.floor(Math.random() * 156) + 100;
+      return `rgb(${r},${g},${b})`;
     }
-    
-    const datasets = [], phoneColors = {}, phoneNames = Object.keys(groups);
-    
-    phoneNames.sort((a, b) =>
-      formatPhoneName(b).localeCompare(formatPhoneName(a))
-    );
-    
-    phoneNames.forEach((phone, i) => {
-      phoneColors[phone] = randomColor();
-      const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
-      datasets.push({
-        label: formatPhoneName(phone),
-        data: dataPoints,
-        borderColor: phoneColors[phone],
-        backgroundColor: phoneColors[phone],
-        borderWidth: 2,
-        tension: 0.1,
-        pointRadius: 5,
-        pointHoverRadius: 10,
-        pointHitRadius: 20
-      });
-    });
-    
-    const ctx      = document.getElementById('priceChart').getContext('2d');
-    const priceChart = new Chart(ctx, {
-      type: 'line',
-      data: { datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        onHover(evt, elements) {
-          if (elements.length) {
-            const idx = elements[0].datasetIndex;
-            datasets.forEach((ds, j) => {
-              ds.borderWidth = j === idx ? 5 : 2;
-              ds.borderColor = j === idx
-                ? phoneColors[phoneNames[j]]
-                : "rgba(200,200,200,0.3)";
-            });
-            listItems.forEach((li, j) => {
-              li.style.backgroundColor = j === idx ? "#f0f0f0" : "";
-            });
-          } else {
-            datasets.forEach((ds, j) => {
-              ds.borderWidth = 2;
-              ds.borderColor = phoneColors[phoneNames[j]];
-            });
-            listItems.forEach(li => (li.style.backgroundColor = ""));
-          }
-          priceChart.update("none");
-        },
-        scales: {
-          x: {
-            type: 'time',
-            time: { parser: 'yyyy-MM-dd', unit: 'day', displayFormats: { day: 'MMM dd' } },
-            ticks: { maxRotation: 90, minRotation: 90, font: { size: 16 } }
-          },
-          y: {
-            ticks: { 
-              stepSize: 100,
-              font: { size: 16 }
-            }
-          }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            mode: 'nearest',
-            intersect: false,
-            callbacks: {
-              title(tooltipItems) {
-                const d = new Date(tooltipItems[0].parsed.x);
-                return d.toLocaleDateString(undefined, {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                });
+
+    function formatPhoneName(fullName) {
+      let name = fullName.replace(/5G/gi, "");
+      let start = name.indexOf("Pixel") === -1 ? 0 : name.indexOf("Pixel");
+      let gbIndex = name.indexOf("GB", start);
+      return gbIndex === -1
+        ? name.trim()
+        : name.substring(start, gbIndex + 2).trim();
+    }
+
+    // Load and parse your CSV (with 0 for out-of-stock)
+    Papa.parse("phone_prices.csv", {
+      download: true,
+      header: true,
+      complete: results => {
+        const groups = {};
+        results.data.forEach(row => {
+          // skip completely empty rows
+          if (!row.date || !row.name || row.price === "") return;
+          // parse price as number (zero is now valid)
+          const price = parseFloat(row.price);
+          if (!groups[row.name]) groups[row.name] = [];
+          groups[row.name].push({ date: row.date, price });
+        });
+        // sort each group
+        Object.values(groups).forEach(arr =>
+          arr.sort((a,b) => new Date(a.date) - new Date(b.date))
+        );
+
+        // build Chart.js datasets
+        const datasets = [];
+        const phoneNames = Object.keys(groups).sort((a,b) =>
+          formatPhoneName(b).localeCompare(formatPhoneName(a))
+        );
+        const phoneColors = {};
+
+        phoneNames.forEach(phone => {
+          const color = randomColor();
+          phoneColors[phone] = color;
+
+          const data = groups[phone].map(pt => ({
+            x: pt.date,
+            y: pt.price
+          }));
+
+          datasets.push({
+            label: formatPhoneName(phone),
+            data,
+            borderColor: color,
+            backgroundColor: color,
+            borderWidth: 2,
+            stepped: 'post',          // <— do a step plot, jump on the day itself
+            spanGaps: false,          // <— don’t join across missing days
+            pointRadius: ctx => {
+              // only draw a circle if price changed vs previous
+              const i = ctx.dataIndex;
+              if (i === 0) return 6;
+              const prev = ctx.dataset.data[i-1].y;
+              const cur  = ctx.dataset.data[i].y;
+              return (cur !== prev) ? 6 : 0;
+            },
+            pointBorderColor: color,
+            pointBackgroundColor: color,
+            pointHoverRadius: 8
+          });
+        });
+
+        // instantiate the chart
+        new Chart(
+          document.getElementById('priceChart').getContext('2d'),
+          {
+            type: 'line',
+            data: { datasets },
+            options: {
+              parsing: false,
+              normalized: true,
+              scales: {
+                x: {
+                  type: 'time',
+                  time: {
+                    parser: 'yyyy-MM-dd',
+                    unit: 'day',
+                    displayFormats: { day: 'MMM dd' }
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: { stepSize: 100 }
+                }
+              },
+              plugins: {
+                legend: { position: 'top' }
               }
             }
           }
-        }
+        );
       }
     });
-    
-    const allDates = results.data.map(r => r.date);
-    const lastDate = allDates.sort()[allDates.length - 1];
-    const listEl = document.getElementById("list");
-    const listItems = [];
-    
-    phoneNames.forEach((phone, i) => {
-      const li = document.createElement("li");
-      const isAvailable = groups[phone].some(pt => pt.date === lastDate);
-      const icon  = isAvailable ? "✔️" : "🚫";
-      const label = formatPhoneName(phone);
-      const url = "https://www.buybest.bg/" + toSlug(phone);
-      const linkOrLabel = isAvailable ? `<a href="${url}" target="_blank">${label}</a>` : label;
-      
-      li.innerHTML = `${icon} ${linkOrLabel}`;
-      li.style.cursor = isAvailable ? "pointer" : "default";
-      li.style.borderLeft = `5px solid ${phoneColors[phone]}`;
-      li.dataset.datasetIndex = i;
-      
-      li.addEventListener("mouseover", () => {
-        priceChart.data.datasets.forEach(ds => { ds.borderWidth = 2; ds.borderColor = "rgba(200, 200, 200, 0.3)"; });
-        priceChart.data.datasets[i].borderWidth = 5;
-        priceChart.data.datasets[i].borderColor = phoneColors[phone];
-        priceChart.update();
-      });
-      
-      li.addEventListener("mouseout", () => {
-        priceChart.data.datasets.forEach(ds => {
-          ds.borderWidth = 2;
-          ds.borderColor = phoneColors[ds.label];
-        });
-        priceChart.update();
-      });
-      
-      listEl.appendChild(li);
-      listItems.push(li);
-    });
-  }
-});
+  </script>
+</body>
+</html>
