@@ -1,10 +1,3 @@
-function randomColor() {
-  const r = Math.floor(Math.random() * 156) + 100,
-        g = Math.floor(Math.random() * 156) + 100,
-        b = Math.floor(Math.random() * 156) + 100;
-  return `rgb(${r},${g},${b})`;
-}
-
 function formatPhoneName(fullName) {
   let name = fullName.replace(/5G/gi, "");
   let start = name.indexOf("Pixel") === -1 ? 0 : name.indexOf("Pixel");
@@ -39,15 +32,36 @@ Papa.parse("history.csv", {
     phoneNames.sort((a, b) =>
       formatPhoneName(b).localeCompare(formatPhoneName(a))
     );
+
+    const palette = [
+      "#1f77b4", // blue
+      "#ff7f0e", // orange
+      "#2ca02c", // green
+      "#d62728", // red
+      "#9467bd", // purple
+      "#8c564b", // brown
+      "#e377c2", // pink
+      "#7f7f7f", // grey
+      "#bcbd22", // olive
+      "#17becf", // teal
+      "#393b79", // dark indigo
+      "#637939", // dark olive
+      "#8c6d31", // mustard
+      "#843c39", // wine
+      "#7b4173", // magenta
+      "#5254a3"  // slate
+    ];
     
     phoneNames.forEach((phone, i) => {
-      phoneColors[phone] = randomColor();
-      const dataPoints = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
+      const color        = palette[i % palette.length];
+      phoneColors[phone] = color;
+      const dataPoints   = groups[phone].map(pt => ({ x: pt.date, y: pt.price }));
+      
       datasets.push({
         label: formatPhoneName(phone),
         data: dataPoints,
-        borderColor: phoneColors[phone],
-        backgroundColor: phoneColors[phone],
+        borderColor: color,
+        backgroundColor: color,
         borderWidth: 2,
         tension: 0.1,
         pointRadius: 5,
@@ -56,7 +70,7 @@ Papa.parse("history.csv", {
       });
     });
     
-    const ctx      = document.getElementById('priceChart').getContext('2d');
+    const ctx        = document.getElementById('priceChart').getContext('2d');
     const priceChart = new Chart(ctx, {
       type: 'line',
       data: { datasets },
