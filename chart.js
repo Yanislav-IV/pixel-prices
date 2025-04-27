@@ -25,7 +25,7 @@ Papa.parse("phone_prices.csv", {
     const groups = {};
     
     results.data.forEach(row => {
-      if (!row.date || !row.name || !row.price) return;
+      if (!row.date || !row.name || row.price === "") return;
       groups[row.name] = groups[row.name] || [];
       groups[row.name].push({ date: row.date, price: parseFloat(row.price) });
     });
@@ -50,7 +50,15 @@ Papa.parse("phone_prices.csv", {
         backgroundColor: phoneColors[phone],
         borderWidth: 2,
         tension: 0.1,
-        pointRadius: 5,
+        stepped: 'post',
+        spanGaps: false,
+        pointRadius: ctx => {
+          const i = ctx.dataIndex;
+          if (i === 0) return 5;
+          const prev = ctx.dataset.data[i - 1].y;
+          const cur  = ctx.dataset.data[i].y;
+          return (cur !== prev) ? 5 : 0;
+        },
         pointHoverRadius: 10,
         pointHitRadius: 20
       });
