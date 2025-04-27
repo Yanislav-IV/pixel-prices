@@ -8,7 +8,9 @@ def load_state(state_file="state.csv"):
     state = {}
     try:
         with open(state_file, newline='', encoding='utf-8') as f:
-            for name, price in csv.reader(f):
+            reader = csv.reader(f)
+            next(reader, None)
+            for name, price in reader:
                 state[name] = {"price": int(price), "in_stock": True}
     except FileNotFoundError:
         pass
@@ -35,28 +37,24 @@ def append_history(changes, history_file="history.csv"):
         writer.writerows(changes)
 
 def main():
-    url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
     subprocess.run(["git", "pull"])
-
     old_state = load_state()
-
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    new_state = {
-        c.find('p', class_='item-brand').get_text(strip=True):
-        {"price": int(c.find('strong').get_text(strip=True)), "in_stock": True}
-        for c in soup.find_all('div', class_='mobile-width')
-    }
-
+    response = requests.get(
+        "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
+    )
+    soup = BeautifulSoup(response.content, "html.parser")
+    new_state = {}
+    for c in soup.find_all("div", class_="mobile-width"):
+        name = c.find("p", class_="item-brand").get_text(strip=True)
+        price = int(c.find("strong").get_text(strip=True))
+        new_state[name] = {"price": price, "in_stock": True}
     changes = diff_states(old_state, new_state)
     append_history(changes)
-
-    with open('state.csv', 'w', newline='', encoding='utf-8') as f:
+    with open("state.csv", "w", newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(["name", "price"])
         for name, info in new_state.items():
             writer.writerow([name, info['price']])
-
     subprocess.run(["git", "add", "history.csv", "state.csv"])
     commit_msg = f"Update history & state {datetime.now().strftime('%Y-%m-%d')}"
     subprocess.run(["git", "commit", "-m", commit_msg])
