@@ -18,7 +18,7 @@ function toSlug(str) {
     .replace(/[^a-z0-9]+/g, "-");
 }
 
-Papa.parse("phone_prices.csv", {
+Papa.parse("history.csv", {
   download: true,
   header: true,
   complete: results => {
