@@ -136,8 +136,6 @@ Papa.parse("history.csv", {
       }
     });
     
-    const allDates = results.data.map(r => r.date);
-    const lastDate = allDates.sort()[allDates.length - 1];
     const listEl = document.getElementById("list");
     const listItems = [];
     
