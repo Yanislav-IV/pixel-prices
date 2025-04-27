@@ -21,13 +21,14 @@ function toSlug(str) {
 Papa.parse("history.csv", {
   download: true,
   header: true,
+  dynamicTyping: true,
   complete: results => {
     const groups = {};
     
     results.data.forEach(row => {
-      if (!row.date || !row.name || !row.price) return;
+      if (!row.date || !row.name) return;
       groups[row.name] = groups[row.name] || [];
-      groups[row.name].push({ date: row.date, price: parseFloat(row.price) });
+      groups[row.name].push({ date: row.date, price: row.price });
     });
     
     for (let phone in groups) {
@@ -49,14 +50,16 @@ Papa.parse("history.csv", {
         borderColor: phoneColors[phone],
         backgroundColor: phoneColors[phone],
         borderWidth: 2,
-        tension: 0.1,
+        tension: 0,
+        spanGaps: false,
+        stepped: 'after',
         pointRadius: 5,
         pointHoverRadius: 10,
         pointHitRadius: 20
       });
     });
     
-    const ctx      = document.getElementById('priceChart').getContext('2d');
+    const ctx        = document.getElementById('priceChart').getContext('2d');
     const priceChart = new Chart(ctx, {
       type: 'line',
       data: { datasets },
