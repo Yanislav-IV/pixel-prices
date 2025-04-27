@@ -60,6 +60,6 @@ def main():
     subprocess.run(["git", "add", "history.csv", "state.csv"])
     commit_msg = f"Update history & state {datetime.now().strftime('%Y-%m-%d')}"
     subprocess.run(["git", "commit", "-m", commit_msg])
-    subprocess.run(["git", "push", "origin", "main"])
+    subprocess.run(["git", "push")
 
 main()
