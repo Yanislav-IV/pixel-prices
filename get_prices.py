@@ -48,18 +48,17 @@ def load_state(state_file="state.csv"):
         pass
     return state
 
-def diff_states(old_state, new_state, tracked_names):
+def diff_states(old_state, new_state):
     today = datetime.now().strftime("%Y-%m-%d")
     changes = []
-    for name in tracked_names:
+    tracked = set(old_state) | set(new_state)
+    for name in tracked:
         old = old_state.get(name, {"price": None, "in_stock": False})
         new = new_state.get(name, {"price": None, "in_stock": False})
-
         if old["price"] != new["price"] or old["in_stock"] != new["in_stock"]:
-            price_field   = new["price"] if new["in_stock"] else ""
+            price_field = new["price"] if new["in_stock"] else ""
             in_stock_flag = int(new["in_stock"])
             changes.append([today, name, price_field, in_stock_flag])
-
     return changes
 
 def main():
