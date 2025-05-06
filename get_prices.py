@@ -18,25 +18,48 @@ def get_all_phones(url):
     soup = BeautifulSoup(requests.get(url).content, 'html.parser')
     return [parse_phone(c) for c in soup.find_all('div', class_='mobile-width')]
 
-def update_csv(phones, filename="history.csv"):
-    file_exists = os.path.isfile(filename)
-    today = datetime.now().strftime("%Y-%m-%d")
-    with open(filename, 'a', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        for phone in phones:
-            writer.writerow([today, phone["name"], phone["price"]])
-
 def commit_and_push_changes():
     subprocess.run(["git", "add", "history.csv"])
     commit_message = "Update phone prices for " + datetime.now().strftime("%Y-%m-%d")
     subprocess.run(["git", "commit", "-m", commit_message])
     subprocess.run(["git", "push", "origin", "main"])
 
+def read_last_snapshot(filename="history.csv"):
+    if not os.path.isfile(filename):
+        return None, []
+    with open(filename, newline='', encoding='utf-8') as f:
+        rows = list(csv.reader(f))
+    if not rows:
+        return None, []
+    last_date = max(r[0] for r in rows)
+    last = [{"name": r[1], "price": int(r[2])}
+            for r in rows if r[0] == last_date]
+    return last
+
+def snapshots_equal(a, b):
+    return {p["name"]: p["price"] for p in a} == \
+           {p["name"]: p["price"] for p in b}
+
+def append_snapshot(phones, filename="history.csv"):
+    today = datetime.now().strftime("%Y-%m-%d")
+    with open(filename, 'a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        for p in phones:
+            writer.writerow([today, p["name"], p["price"]])
+
 def main():
     url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
     subprocess.run(["git", "pull"])
     phones = get_all_phones(url)
-    update_csv(phones)
+
+    phones_last = read_last_snapshot()
+    today_str = datetime.now().strftime("%Y-%m-%d")
+
+    if snapshots_equal(phones_last, phones_today):
+        print(f"No new changes for {today_str}.")
+        return
+
+    append_snapshot(phones_today)
     commit_and_push_changes()
 
 if __name__ == "__main__":
