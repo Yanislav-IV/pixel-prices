@@ -49,8 +49,7 @@ def append_snapshot(phones, filename="history.csv"):
 def main():
     url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
     subprocess.run(["git", "pull"])
-    phones = get_all_phones(url)
-
+    phones_today = get_all_phones(url)
     phones_last = read_last_snapshot()
     today_str = datetime.now().strftime("%Y-%m-%d")
 
