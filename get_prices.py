@@ -25,16 +25,15 @@ def commit_and_push_changes():
     subprocess.run(["git", "push", "origin", "main"])
 
 def read_last_snapshot(filename="history.csv"):
-    if not os.path.isfile(filename):
-        return None, []
     with open(filename, newline='', encoding='utf-8') as f:
         rows = list(csv.reader(f))
-    if not rows:
-        return None, []
+    if rows and rows[0][0].lower() == "date" and rows[0][2].lower() == "price":
+        rows = rows[1:]
     last_date = max(r[0] for r in rows)
-    last = [{"name": r[1], "price": int(r[2])}
-            for r in rows if r[0] == last_date]
-    return last
+    return [
+        {"name": r[1], "price": int(r[2])}
+        for r in rows if r[0] == last_date
+    ]
 
 def snapshots_equal(a, b):
     return {p["name"]: p["price"] for p in a} == \
