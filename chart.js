@@ -63,7 +63,8 @@ Papa.parse("history.csv", {
         borderColor: color,
         backgroundColor: color,
         borderWidth: 2,
-        tension: 0.1,
+        tension: 0,
+        stepped: 'before',
         pointRadius: 5,
         pointHoverRadius: 10,
         pointHitRadius: 20
