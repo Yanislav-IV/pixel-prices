@@ -6,6 +6,10 @@ import csv
 import os
 import subprocess
 
+URL          = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
+HISTORY_FILE = "history.csv"
+STATE_FILE   = "state.csv"
+
 def extract_price(c):
     price_text = c.find('strong').get_text(strip=True)
     return int(price_text)
@@ -22,12 +26,12 @@ def get_all_phones(url):
     return [parse_phone(c) for c in soup.find_all('div', class_='mobile-width')]
 
 def commit_and_push_changes():
-    subprocess.run(["git", "add", "history.csv", "state.csv"], check=True)
+    subprocess.run(["git", "add", HISTORY_FILE, STATE_FILE], check=True)
     msg = "Update phone prices for " + datetime.now().strftime("%Y-%m-%d")
     subprocess.run(["git", "commit", "-m", msg], check=True)
     subprocess.run(["git", "push", "origin", "main"], check=True)
 
-def read_state(filename="state.csv"):
+def read_state(filename=STATE_FILE):
     state = {}
     if os.path.isfile(filename):
         with open(filename, newline='', encoding='utf-8') as f:
@@ -35,7 +39,7 @@ def read_state(filename="state.csv"):
                 state[name] = int(price)
     return state
 
-def write_state(new_state, filename="state.csv"):
+def write_state(new_state, filename=STATE_FILE):
     old_state = read_state(filename)
     all_names = set(old_state) | set(new_state.keys())
     with open(filename, 'w', newline='', encoding='utf-8') as f:
@@ -57,16 +61,15 @@ def make_events(old, new):
 
     return evs
 
-def append_events(events, filename="history.csv"):
+def append_events(events, filename=HISTORY_FILE):
     with open(filename, 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerows(events)
 
 def main():
-    url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
     subprocess.run(["git", "pull"], check=True)
 
-    phones = get_all_phones(url)
+    phones = get_all_phones(URL)
     new_state = {p["name"]: p["price"] for p in phones}
 
     old_state = read_state()
