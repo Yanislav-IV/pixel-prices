@@ -101,7 +101,7 @@ def main():
     padding = [(tomorrow, name, price) for name, price in full_state.items()]
     append_events(padding)
 
-#     commit_and_push_changes()
+    commit_and_push_changes()
 
 if __name__ == "__main__":
     main()
