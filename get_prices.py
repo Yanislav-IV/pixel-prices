@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 import csv
 import os
 import subprocess
@@ -51,14 +51,13 @@ def write_state(new_state, filename=STATE_FILE):
 def make_events(old, new):
     today = datetime.now().strftime("%Y-%m-%d")
     evs = []
-    for name, pnew in new.items():
-        pold = old.get(name, 0)
-        if pnew != pold:
-            evs.append((today, name, pnew))
-    for name, pold in old.items():
-        if name not in new and pold > 0:
+    for name, new_price in new.items():
+        old_price = old.get(name, 0)
+        if new_price != old_price:
+            evs.append((today, name, new_price))
+    for name, old_price in old.items():
+        if name not in new and old_price > 0:
             evs.append((today, name, 0))
-
     return evs
 
 def append_events(events, filename=HISTORY_FILE):
@@ -66,23 +65,43 @@ def append_events(events, filename=HISTORY_FILE):
         writer = csv.writer(f)
         writer.writerows(events)
 
+def remove_last_n_lines(n, filename=HISTORY_FILE):
+    with open(filename, newline='', encoding='utf-8') as f:
+        lines = f.readlines()
+    if not lines:
+        return
+    header = []
+    data = lines
+    if lines[0].lower().startswith("date,"):
+        header = [lines[0]]
+        data = lines[1:]
+    trimmed = data[:-n] if n <= len(data) else []
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        f.writelines(header + trimmed)
+
 def main():
     subprocess.run(["git", "pull"], check=True)
+
+    old_state = read_state()
+    remove_last_n_lines(len(old_state))
 
     phones = get_all_phones(URL)
     new_state = {p["name"]: p["price"] for p in phones}
 
-    old_state = read_state()
-
     events = make_events(old_state, new_state)
-    if not events:
+    if events:
+        append_events(events)
+    else:
         print("No new changes for today.")
-        return
 
-    append_events(events)
     write_state(new_state)
 
-    commit_and_push_changes()
+    full_state = read_state()
+    tomorrow = (datetime.now().date() + timedelta(days=1)).strftime("%Y-%m-%d")
+    padding = [(tomorrow, name, price) for name, price in full_state.items()]
+    append_events(padding)
+
+#     commit_and_push_changes()
 
 if __name__ == "__main__":
     main()
