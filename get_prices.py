@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -6,8 +7,8 @@ import os
 import subprocess
 
 def extract_price(c):
-    price = c.find('strong').get_text(strip=True)
-    return int(price)
+    price_text = c.find('strong').get_text(strip=True)
+    return int(price_text)
 
 def parse_phone(c):
     name = c.find('p', class_='item-brand').get_text(strip=True)
@@ -15,49 +16,69 @@ def parse_phone(c):
     return {"name": name, "price": price}
 
 def get_all_phones(url):
-    soup = BeautifulSoup(requests.get(url).content, 'html.parser')
+    r = requests.get(url)
+    r.raise_for_status()
+    soup = BeautifulSoup(r.content, 'html.parser')
     return [parse_phone(c) for c in soup.find_all('div', class_='mobile-width')]
 
 def commit_and_push_changes():
-    subprocess.run(["git", "add", "history.csv"])
-    commit_message = "Update phone prices for " + datetime.now().strftime("%Y-%m-%d")
-    subprocess.run(["git", "commit", "-m", commit_message])
-    subprocess.run(["git", "push", "origin", "main"])
+    subprocess.run(["git", "add", "history.csv", "state.csv"], check=True)
+    msg = "Update phone prices for " + datetime.now().strftime("%Y-%m-%d")
+    subprocess.run(["git", "commit", "-m", msg], check=True)
+    subprocess.run(["git", "push", "origin", "main"], check=True)
 
-def read_last_snapshot(filename="history.csv"):
-    with open(filename, newline='', encoding='utf-8') as f:
-        rows = list(csv.reader(f))
-    if rows and rows[0][0].lower() == "date" and rows[0][2].lower() == "price":
-        rows = rows[1:]
-    last_date = max(r[0] for r in rows)
-    return [
-        {"name": r[1], "price": int(r[2])}
-        for r in rows if r[0] == last_date
-    ]
+def read_state(filename="state.csv"):
+    state = {}
+    if os.path.isfile(filename):
+        with open(filename, newline='', encoding='utf-8') as f:
+            for name, price in csv.reader(f):
+                state[name] = int(price)
+    return state
 
-def snapshots_equal(a, b):
-    return {p["name"]: p["price"] for p in a} == \
-           {p["name"]: p["price"] for p in b}
+def write_state(new_state, filename="state.csv"):
+    old_state = read_state(filename)
+    all_names = set(old_state) | set(new_state.keys())
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        for name in sorted(all_names, reverse=True):
+            price = new_state.get(name, 0)
+            writer.writerow([name, price])
 
-def append_snapshot(phones, filename="history.csv"):
+def make_events(old, new):
     today = datetime.now().strftime("%Y-%m-%d")
+    evs = []
+    for name, pnew in new.items():
+        pold = old.get(name, 0)
+        if pnew != pold:
+            evs.append((today, name, pnew))
+    for name, pold in old.items():
+        if name not in new and pold > 0:
+            evs.append((today, name, 0))
+
+    return evs
+
+def append_events(events, filename="history.csv"):
     with open(filename, 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        for p in phones:
-            writer.writerow([today, p["name"], p["price"]])
+        writer.writerows(events)
 
 def main():
     url = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
-    subprocess.run(["git", "pull"])
-    phones_today = get_all_phones(url)
-    phones_last = read_last_snapshot()
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    subprocess.run(["git", "pull"], check=True)
 
-    if snapshots_equal(phones_last, phones_today):
-        print(f"No new changes for {today_str}.")
+    phones = get_all_phones(url)
+    new_state = {p["name"]: p["price"] for p in phones}
+
+    old_state = read_state()
+
+    events = make_events(old_state, new_state)
+    if not events:
+        print("No new changes for today.")
         return
 
-    append_snapshot(phones_today)
+    append_events(events)
+    write_state(new_state)
+
     commit_and_push_changes()
 
 if __name__ == "__main__":
