@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import csv
 import os
-import subprocess
 
 URL          = "https://www.buybest.bg/manufacturers/google?category=1&per-page=24"
 HISTORY_FILE = "history.csv"
@@ -29,12 +27,6 @@ def get_all_phones(url):
     r.raise_for_status()
     soup = BeautifulSoup(r.content, 'html.parser')
     return [parse_phone(c) for c in soup.find_all('div', class_='mobile-width')]
-
-def commit_and_push_changes():
-    subprocess.run(["git", "add", HISTORY_FILE, STATE_FILE], check=True)
-    msg = f"Update phone prices for {TOMORROW_STR}"
-    subprocess.run(["git", "commit", "-m", msg], check=True)
-    subprocess.run(["git", "push", "origin", "main"], check=True)
 
 def read_state(filename=STATE_FILE):
     state = {}
@@ -92,8 +84,6 @@ def read_state_ordered(filename=STATE_FILE):
     return ordered
 
 def main():
-    subprocess.run(["git", "pull"], check=True)
-
     old_state = read_state()
     num_prev_available = sum(1 for price in old_state.values() if price > 0)
     remove_last_n_lines(num_prev_available)
@@ -104,8 +94,9 @@ def main():
     events = make_events(old_state, new_state)
     if events:
         append_events(events)
+        print(f"Events added for {TODAY_STR}: {len(events)}")
     else:
-        print("No new changes for today.")
+        print(f"No events added for {TODAY_STR}")
 
     write_state(new_state)
 
@@ -116,8 +107,6 @@ def main():
         if price > 0
     ]
     append_events(padding)
-
-    commit_and_push_changes()
 
 if __name__ == "__main__":
     main()
