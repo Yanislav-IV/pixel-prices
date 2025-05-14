@@ -10,6 +10,11 @@ URL          = "https://www.buybest.bg/manufacturers/google?category=1&per-page=
 HISTORY_FILE = "history.csv"
 STATE_FILE   = "state.csv"
 
+TODAY       = datetime.now().date()
+TODAY_STR   = TODAY.strftime("%Y-%m-%d")
+TOMORROW    = TODAY + timedelta(days=1)
+TOMORROW_STR = TOMORROW.strftime("%Y-%m-%d")
+
 def extract_price(c):
     price_text = c.find('strong').get_text(strip=True)
     return int(price_text)
@@ -27,7 +32,7 @@ def get_all_phones(url):
 
 def commit_and_push_changes():
     subprocess.run(["git", "add", HISTORY_FILE, STATE_FILE], check=True)
-    msg = "Update phone prices for " + datetime.now().strftime("%Y-%m-%d")
+    msg = f"Update phone prices for {TOMORROW_STR}"
     subprocess.run(["git", "commit", "-m", msg], check=True)
     subprocess.run(["git", "push", "origin", "main"], check=True)
 
@@ -49,15 +54,14 @@ def write_state(new_state, filename=STATE_FILE):
             writer.writerow([name, price])
 
 def make_events(old, new):
-    today = datetime.now().strftime("%Y-%m-%d")
     evs = []
     for name, new_price in new.items():
         old_price = old.get(name, 0)
         if new_price != old_price:
-            evs.append((today, name, new_price))
+            evs.append((TODAY_STR, name, new_price))
     for name, old_price in old.items():
         if name not in new and old_price > 0:
-            evs.append((today, name, 0))
+            evs.append((TODAY_STR, name, 0))
     return evs
 
 def append_events(events, filename=HISTORY_FILE):
@@ -79,11 +83,20 @@ def remove_last_n_lines(n, filename=HISTORY_FILE):
     with open(filename, 'w', newline='', encoding='utf-8') as f:
         f.writelines(header + trimmed)
 
+def read_state_ordered(filename=STATE_FILE):
+    ordered = []
+    if os.path.isfile(filename):
+        with open(filename, newline='', encoding='utf-8') as f:
+            for name, price in csv.reader(f):
+                ordered.append((name, int(price)))
+    return ordered
+
 def main():
     subprocess.run(["git", "pull"], check=True)
 
     old_state = read_state()
-    remove_last_n_lines(len(old_state))
+    num_prev_available = sum(1 for price in old_state.values() if price > 0)
+    remove_last_n_lines(num_prev_available)
 
     phones = get_all_phones(URL)
     new_state = {p["name"]: p["price"] for p in phones}
@@ -96,9 +109,12 @@ def main():
 
     write_state(new_state)
 
-    full_state = read_state()
-    tomorrow = (datetime.now().date() + timedelta(days=1)).strftime("%Y-%m-%d")
-    padding = [(tomorrow, name, price) for name, price in full_state.items()]
+    state_ordered = read_state_ordered()
+    padding = [
+        (TOMORROW_STR, name, price)
+        for name, price in state_ordered
+        if price > 0
+    ]
     append_events(padding)
 
     commit_and_push_changes()
