@@ -94,9 +94,9 @@ def main():
     events = make_events(old_state, new_state)
     if events:
         append_events(events)
-        print(f"Events added for {TODAY_STR}: {len(events)}")
+        print(f"Events added for {TOMORROW_STR}: {len(events)}")
     else:
-        print(f"No events added for {TODAY_STR}")
+        print(f"No events added for {TOMORROW_STR}")
 
     write_state(new_state)
 
